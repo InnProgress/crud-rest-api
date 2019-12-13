@@ -4,10 +4,12 @@ const router = express.Router();
 import Note from "./models/Note";
 
 router.get('/', (_, res) => {
-    Note.find({}, (err, result) => {
+    Note.find({})
+      .sort('-date')
+      .exec((err, result) => {
         if (err) res.json(err);
         res.json(result);
-    });
+      });
 });
 
 router.post('/', (req, res) => {
@@ -17,9 +19,7 @@ router.post('/', (req, res) => {
         date: Date.now()
     });
     newNote.save().then(() =>
-        res.json({
-            success: true
-        })
+        res.json(newNote)
     ).catch(error =>
         res.json({
             name: error.name,
@@ -28,25 +28,27 @@ router.post('/', (req, res) => {
     );
 });
 
-router.get('/post/:id', (req, res) => {
+router.get('/note/:id', (req, res) => {
     Note.findById(req.params.id, (err, data) => {
         if (err) res.json(err);
         res.json(data);
     })
 });
 
-router.delete("/post/:id", (req, res) => {
+router.delete("/note/:id", (req, res) => {
   Note.findByIdAndRemove(req.params.id, (err, data) => {
     if (err) res.json(err);
     res.json(data);
   });
 });
 
-router.patch("/post/:id", (req, res) => {
+router.patch("/note/:id", (req, res) => {
   Note.findByIdAndUpdate(req.params.id, {
     title: req.body.title,
     body: req.body.body,
     updated: Date.now()
+  }, {
+    new: true
   }, (err, data) => {
     if (err) res.json(err);
     res.json(data);
